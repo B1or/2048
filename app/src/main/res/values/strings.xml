@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">2048</string>
+    <string name="win">You win!</string>
+    <string name="play">Play</string>
+    <string name="exit">Exit</string>
+    <string name="game_over">Game over</string>
+    <string name="score_">Score:</string>
+</resources>
