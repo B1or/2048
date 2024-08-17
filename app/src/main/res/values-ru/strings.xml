@@ -4,6 +4,7 @@
     <string name="win">Победа!</string>
     <string name="play">Играть</string>
     <string name="exit">Выйти</string>
-    <string name="game_over">Игра закончена</string>
+    <string name="game_over">Игра закончена.</string>
     <string name="score_">Счёт:</string>
+    <string name="played">Идёт игра.</string>
 </resources>

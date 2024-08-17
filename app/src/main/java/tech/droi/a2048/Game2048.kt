@@ -1,44 +1,26 @@
 package tech.droi.a2048
 
-import androidx.compose.runtime.MutableIntState
-import androidx.compose.runtime.MutableState
 import kotlin.random.Random
 
 class Game2048 {
+
+    var gameField = Array(SIDE) { IntArray(SIDE) }
     private var score = 0
+    private var gameState: GameState = GameState.PLAY
 
-    fun initialize(tiles: Array<Array<MutableIntState>>, showDialog: MutableState<Boolean>, win: MutableState<Boolean>) {
-        createGame(showDialog, win)
-        drawScene(tiles)
-    }
-
-    private fun drawScene(tiles: Array<Array<MutableIntState>>) {
-        for (y in 0 ..< SIDE)
-            for (x in 0 ..< SIDE)
-                tiles[y][x].intValue = gameField[y][x]
-    }
-
-    private fun createGame(showDialog: MutableState<Boolean>, win: MutableState<Boolean>) {
+    fun createGame() {
         for (y in 0 ..< SIDE)
             for (x in 0 ..< SIDE)
                 gameField[y][x] = 0
-        createNewNumber(showDialog, win)
-        createNewNumber(showDialog, win)
+        score = 0
+        gameState = GameState.PLAY
+        createNewNumber()
+        createNewNumber()
     }
 
-    private fun gameOver(showDialog: MutableState<Boolean>, win: MutableState<Boolean>) {
-        win.value = false
-        showDialog.value = true
-    }
-
-    private fun win(showDialog: MutableState<Boolean>, win: MutableState<Boolean>) {
-        win.value = true
-        showDialog.value = true
-    }
-
-    private fun createNewNumber(showDialog: MutableState<Boolean>, win: MutableState<Boolean>) {
+    private fun createNewNumber() {
         if (getMaxTileValue() >= 2048) {
-            win(showDialog, win)
+            gameState = GameState.WIN
             return
         }
         var isCreated = false
@@ -64,30 +46,23 @@ class Game2048 {
         return max
     }
 
-    fun move(
-        direction: Direction,
-        tiles: Array<Array<MutableIntState>>,
-        showDialog: MutableState<Boolean>,
-        win: MutableState<Boolean>,
-        score: MutableIntState
-    ) {
+    fun move(direction: Direction) {
         if (canUserMove()) {
             when (direction) {
-                Direction.UP -> moveUp(showDialog, win, score)
-                Direction.DOWN -> moveDown(showDialog, win, score)
-                Direction.LEFT -> moveLeft(showDialog, win, score)
-                Direction.RIGHT -> moveRight(showDialog, win, score)
+                Direction.UP -> moveUp()
+                Direction.DOWN -> moveDown()
+                Direction.LEFT -> moveLeft()
+                Direction.RIGHT -> moveRight()
             }
-            drawScene(tiles)
         } else
-            gameOver(showDialog, win)
+            gameState = GameState.GAME_OVER
     }
 
-    private fun moveLeft(showDialog: MutableState<Boolean>, win: MutableState<Boolean>, score: MutableIntState) {
+    private fun moveLeft() {
         var isNewNumberNeeded = false
         for (row in gameField) {
             val wasCompressed: Boolean = compressRow(row)
-            val wasMerged: Boolean = mergeRow(row, score)
+            val wasMerged: Boolean = mergeRow(row)
             if (wasMerged) {
                 compressRow(row)
             }
@@ -96,29 +71,29 @@ class Game2048 {
             }
         }
         if (isNewNumberNeeded) {
-            createNewNumber(showDialog, win)
+            createNewNumber()
         }
     }
 
-    private fun moveUp(showDialog: MutableState<Boolean>, win: MutableState<Boolean>, score: MutableIntState) {
+    private fun moveUp() {
         rotateClockwise()
         rotateClockwise()
         rotateClockwise()
-        moveLeft(showDialog, win, score)
-        rotateClockwise()
-    }
-
-    private fun moveRight(showDialog: MutableState<Boolean>, win: MutableState<Boolean>, score: MutableIntState) {
-        rotateClockwise()
-        rotateClockwise()
-        moveLeft(showDialog, win, score)
-        rotateClockwise()
+        moveLeft()
         rotateClockwise()
     }
 
-    private fun moveDown(showDialog: MutableState<Boolean>, win: MutableState<Boolean>, score: MutableIntState) {
+    private fun moveRight() {
         rotateClockwise()
-        moveLeft(showDialog, win, score)
+        rotateClockwise()
+        moveLeft()
+        rotateClockwise()
+        rotateClockwise()
+    }
+
+    private fun moveDown() {
+        rotateClockwise()
+        moveLeft()
         rotateClockwise()
         rotateClockwise()
         rotateClockwise()
@@ -150,15 +125,14 @@ class Game2048 {
         return result
     }
 
-    private fun mergeRow(row: IntArray, score: MutableIntState): Boolean {
+    private fun mergeRow(row: IntArray): Boolean {
         var result = false
         for (i in 0 until row.size - 1) {
             if (row[i] != 0 && row[i] == row[i + 1]) {
                 row[i] += row[i + 1]
                 row[i + 1] = 0
                 result = true
-                this.score += row[i]
-                setScore(score)
+                score += row[i]
             }
         }
         return result
@@ -179,7 +153,7 @@ class Game2048 {
         return false
     }
 
-    private fun setScore(score: MutableIntState) {
-        score.intValue = this.score
+    companion object {
+        const val SIDE = 4
     }
 }
